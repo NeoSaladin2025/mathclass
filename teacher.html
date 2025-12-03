@@ -1152,67 +1152,96 @@
       transform: translateY(0);
     }
     
-    .problem {
+    /* 4분할 그리드 레이아웃 */
+    .page {
       background: white;
-      padding: 30px;
-      margin-bottom: 20px;
-      border-radius: 10px;
+      page-break-after: always;
+      padding: 10mm;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 5mm;
+      min-height: 277mm; /* A4 세로 길이 */
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .page:last-child {
+      page-break-after: auto;
+    }
+    
+    .problem {
+      border: 1px solid #ddd;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
     
     .problem h3 {
       color: #333;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
+      font-size: 14px;
+      margin-bottom: 8px;
+      padding-bottom: 5px;
       border-bottom: 2px solid #667eea;
+      flex-shrink: 0;
     }
     
     .problem img {
-      max-width: 100%;
-      display: block;
-      margin: 20px auto;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+      width: 100%;
+      height: auto;
+      max-height: calc(100% - 80px);
+      object-fit: contain;
+      margin-bottom: 8px;
     }
     
     .answer-space {
-      margin-top: 30px;
-      padding: 20px;
+      margin-top: auto;
+      padding: 5px;
       background: #f9f9f9;
-      border-left: 4px solid #667eea;
+      border-left: 3px solid #667eea;
+      font-size: 12px;
+      flex-shrink: 0;
     }
     
     /* 인쇄용 스타일 */
     @media print {
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      
       body {
         background: white;
         padding: 0;
+        margin: 0;
       }
       
       .student-badge {
-        position: static;
-        display: inline-block;
-        margin-bottom: 10px;
+        position: absolute;
+        top: 5mm;
+        left: 5mm;
+        font-size: 14px;
+        padding: 8px 15px;
       }
       
       .header {
-        box-shadow: none;
-        border-bottom: 2px solid #333;
-        margin-top: 0;
+        display: none;
       }
       
       .print-btn {
         display: none;
       }
       
-      .problem {
+      .page {
         box-shadow: none;
-        page-break-after: always;
-        page-break-inside: avoid;
+        margin: 0;
+        padding: 15mm 10mm 10mm 10mm;
+        min-height: 297mm;
       }
       
-      .problem:last-child {
-        page-break-after: auto;
+      .problem {
+        border: 1px solid #333;
       }
     }
   </style>
@@ -1228,18 +1257,32 @@
     <button class="print-btn" onclick="window.print()">🖨️ 인쇄하기</button>
   </div>
   
-  ${problems.map((problemNum, index) => {
-    const paddedNum = problemNum.toString().padStart(4, '0');
-    return `
-      <div class="problem">
-        <h3>문제 ${index + 1}. (원본 ${problemNum}번)</h3>
-        <img src="problems/${bookName}/${paddedNum}.png" alt="문제 ${problemNum}">
-        <div class="answer-space">
-          <strong>답:</strong> __________________________________________
+  ${(() => {
+    let html = '';
+    let pageHtml = '';
+    
+    problems.forEach((problemNum, index) => {
+      const paddedNum = problemNum.toString().padStart(4, '0');
+      
+      pageHtml += `
+        <div class="problem">
+          <h3>문제 ${index + 1}. (원본 ${problemNum}번)</h3>
+          <img src="problems/${bookName}/${paddedNum}.png" alt="문제 ${problemNum}">
+          <div class="answer-space">
+            <strong>답:</strong> _______________________
+          </div>
         </div>
-      </div>
-    `;
-  }).join('')}
+      `;
+      
+      // 4문제마다 페이지 생성
+      if ((index + 1) % 4 === 0 || index === problems.length - 1) {
+        html += `<div class="page">${pageHtml}</div>`;
+        pageHtml = '';
+      }
+    });
+    
+    return html;
+  })()}
   
 </body>
 </html>

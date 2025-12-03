@@ -1057,12 +1057,12 @@
                 if (data.success) {
                     showMessage('diagMessage', `✅ ${data.message}`, 'success');
                     
-                    // 학생 이름 가져오기
-                    const studentSelect = document.getElementById('diagStudent');
-                    const studentName = studentSelect.options[studentSelect.selectedIndex].text;
+                    // 학생 이름 가져오기 (라디오 버튼에서)
+                    const selectedRadio = document.querySelector('input[name="diagStudent"]:checked');
+                    const studentLabel = selectedRadio ? selectedRadio.nextElementSibling.textContent.trim() : diagSelectedStudent;
                     
                     // 새 창에서 출력 화면 열기
-                    openPrintWindow(studentName, diagSelectedBook, data.problems);
+                    openPrintWindow(studentLabel, diagSelectedBook, data.problems);
                 } else {
                     showMessage('diagMessage', data.message, 'error');
                 }

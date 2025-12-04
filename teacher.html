@@ -220,6 +220,86 @@
             font-size: 13px;
         }
         
+        /* 🔥 구간 조회 버튼 스타일 추가 */
+        button.check-range {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            padding: 12px 24px;
+            margin-top: 15px;
+        }
+        
+        button.check-range:hover {
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        /* 🔥 조회 결과 박스 스타일 추가 */
+        .range-result-box {
+            display: none;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .range-result-box.active {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .range-result-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .range-result-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .range-result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .range-result-item .label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .range-result-item .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .range-result-item .unit {
+            font-size: 14px;
+            color: #999;
+            margin-left: 4px;
+        }
+        
         .list-box {
             max-height: 250px;
             overflow-y: auto;
@@ -313,369 +393,257 @@
         }
         
         .message {
-            padding: 15px;
+            padding: 15px 20px;
             border-radius: 10px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
+            margin-top: 20px;
+            font-size: 14px;
         }
         
-        .success {
+        .message.success {
             background: #d4edda;
             color: #155724;
             border: 1px solid #c3e6cb;
         }
         
-        .error {
+        .message.error {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
-        }
-        
-        .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .range-item {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .range-inputs {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .add-range-btn {
-            background: #28a745;
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        
-        .hidden {
-            display: none;
         }
     </style>
 </head>
 <body>
     <div class="dashboard">
         <!-- 왼쪽 사이드바 -->
-        <div class="sidebar">
+        <aside class="sidebar">
             <div class="sidebar-header">
-                <h1>🎓 선생님 대시보드</h1>
-                <p><strong id="teacherName"></strong>님</p>
+                <h1>📚 선생님 대시보드</h1>
+                <p>학생 관리 시스템</p>
             </div>
             
-            <!-- 진행 상황 -->
             <div class="progress-area">
-                <h3>⏳ 진행 상황</h3>
-                <div class="progress-status" id="progressStatus">
-                    대기 중...
-                </div>
+                <h3>진행 상황</h3>
+                <div id="progressStatus" class="progress-status"></div>
             </div>
             
-            <!-- 메뉴 -->
-            <div class="menu">
+            <nav class="menu">
                 <div class="menu-item active" onclick="showSection('homework')">
-                    <span class="menu-icon">📚</span>
-                    <span>숙제 출제</span>
+                    <span class="menu-icon">📝</span>
+                    <span>숙제 등록</span>
                 </div>
                 <div class="menu-item" onclick="showSection('diagnostic')">
-                    <span class="menu-icon">📊</span>
+                    <span class="menu-icon">🔍</span>
                     <span>진단평가 출제</span>
                 </div>
-            </div>
+                <div class="menu-item" onclick="showSection('results')">
+                    <span class="menu-icon">📊</span>
+                    <span>결과 조회</span>
+                </div>
+            </nav>
             
-            <!-- 로그아웃 -->
             <button class="logout-btn" onclick="logout()">🚪 로그아웃</button>
-        </div>
+        </aside>
         
         <!-- 메인 컨텐츠 -->
-        <div class="main-content">
-            <!-- 숙제 출제 섹션 -->
-            <div class="content-section active" id="homeworkSection">
-                <h2>📚 숙제 출제</h2>
-                
-                <div id="homeworkMessage"></div>
+        <main class="main-content">
+            <!-- 숙제 등록 섹션 -->
+            <section id="homeworkSection" class="content-section active">
+                <h2>📝 숙제 등록</h2>
                 
                 <form id="homeworkForm">
                     <div class="form-group">
-                        <label for="hwGradeSelect">1단계: 학년 선택</label>
-                        <select id="hwGradeSelect" required onchange="onGradeChange('homework')">
+                        <label>학년 선택</label>
+                        <select id="hwGrade" required>
                             <option value="">학년을 선택하세요</option>
-                            <option value="중1">중1</option>
-                            <option value="중2">중2</option>
-                            <option value="중3">중3</option>
-                            <option value="고1">고1</option>
-                            <option value="고2">고2</option>
-                            <option value="고3">고3</option>
+                            <option value="1">1학년</option>
+                            <option value="2">2학년</option>
+                            <option value="3">3학년</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label>2단계: 학생 선택</label>
-                        <div class="list-box" id="hwStudentList">
-                            <p style="color: #999; text-align: center;">학년을 먼저 선택하세요</p>
+                        <label>학생 선택</label>
+                        <div id="hwStudentList" class="list-box">
+                            <p style="color: #999; text-align: center; padding: 20px;">학년을 먼저 선택하세요</p>
                         </div>
                     </div>
                     
-                    <div class="form-group" id="hwBookGroup" style="display: none;">
-                        <label>3단계: 문제집 선택</label>
-                        <div class="list-box" id="hwBookList">
-                            <p style="color: #999; text-align: center;">학생을 먼저 선택하세요</p>
+                    <div class="form-group">
+                        <label>문제집 선택</label>
+                        <div id="hwBookList" class="list-box">
+                            <p style="color: #999; text-align: center; padding: 20px;">학생을 먼저 선택하세요</p>
                         </div>
                     </div>
                     
-                    <!-- 학생 현황 -->
-                    <div id="hwStudentStatus" class="hidden">
-                        <div class="status-box">
-                            <h3 style="font-size: 18px; margin-bottom: 15px; color: #667eea;">
-                                👤 <span id="hwStudentNameDisplay"></span> - <span id="hwBookNameDisplay"></span>
-                            </h3>
-                            
-                            <strong style="font-size: 15px;">🔄 복습 가능 (틀린 문제)</strong>
-                            <div class="status-row">
-                                <span class="status-label">일반유형:</span>
-                                <span class="status-value" id="hwWrongGeneral">0개</span>
-                            </div>
-                            <div class="status-row">
-                                <span class="status-label">서술형:</span>
-                                <span class="status-value" id="hwWrongEssay">0개</span>
-                            </div>
-                            <div class="status-row">
-                                <span class="status-label">1등급:</span>
-                                <span class="status-value" id="hwWrongGrade1">0개</span>
-                            </div>
-                            
-                            <div class="divider"></div>
-                            
-                            <strong style="font-size: 15px;">✨ 안 푼 문제</strong>
-                            <div class="status-row">
-                                <span class="status-label">일반유형:</span>
-                                <span class="status-value" id="hwUnsolvedGeneral">0개</span>
-                            </div>
-                            <div class="status-row">
-                                <span class="status-label">서술형:</span>
-                                <span class="status-value" id="hwUnsolvedEssay">0개</span>
-                            </div>
-                            <div class="status-row">
-                                <span class="status-label">1등급:</span>
-                                <span class="status-value" id="hwUnsolvedGrade1">0개</span>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="divider"></div>
                     
-                    <!-- 숙제 구성 -->
-                    <div id="hwComposition" class="hidden">
+                    <div id="hwProblemSettings" style="display: none;">
+                        <h3 style="color: #667eea; margin-bottom: 20px;">📋 숙제 내용 설정</h3>
+                        
                         <div class="form-group">
-                            <label for="hwTotal">총 문항수</label>
-                            <input type="number" id="hwTotal" min="1" value="80" onchange="updateHomeworkTotals()">
+                            <label>범위 설정</label>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                <input type="number" id="hwRangeStart" placeholder="시작" style="width: 100px;" min="1">
+                                <span>~</span>
+                                <input type="number" id="hwRangeEnd" placeholder="끝" style="width: 100px;" min="1">
+                            </div>
                         </div>
                         
-                        <div class="divider"></div>
-                        
-                        <h3 style="font-size: 18px; margin-bottom: 15px; color: #667eea;">🔄 복습용 문제</h3>
                         <div class="problem-count-row">
-                            <label>일반유형:</label>
-                            <input type="number" id="hwReviewGeneral" min="0" value="0" onchange="updateHomeworkTotals()">
-                            <span class="max-info">최대 <span id="hwMaxReviewGeneral">0</span>개</span>
-                        </div>
-                        <div class="problem-count-row">
-                            <label>서술형:</label>
-                            <input type="number" id="hwReviewEssay" min="0" value="0" onchange="updateHomeworkTotals()">
-                            <span class="max-info">최대 <span id="hwMaxReviewEssay">0</span>개</span>
-                        </div>
-                        <div class="problem-count-row">
-                            <label>1등급:</label>
-                            <input type="number" id="hwReviewGrade1" min="0" value="0" onchange="updateHomeworkTotals()">
-                            <span class="max-info">최대 <span id="hwMaxReviewGrade1">0</span>개</span>
-                        </div>
-                        <div style="text-align: right; margin-top: 10px;">
-                            <strong style="font-size: 16px;">소계: <span id="hwReviewTotal">0</span>개</strong>
+                            <label>일반 유형</label>
+                            <input type="number" id="hwGeneral" value="0" min="0">
+                            <span class="max-info">문제</span>
                         </div>
                         
-                        <div class="divider"></div>
-                        
-                        <h3 style="font-size: 18px; margin-bottom: 15px; color: #667eea;">✨ 새문제 (안 푼 문제)</h3>
                         <div class="problem-count-row">
-                            <label>일반유형:</label>
-                            <input type="number" id="hwNewGeneral" min="0" value="0" onchange="updateHomeworkTotals()">
-                            <span class="max-info">최대 <span id="hwMaxNewGeneral">0</span>개</span>
+                            <label>서술형</label>
+                            <input type="number" id="hwEssay" value="0" min="0">
+                            <span class="max-info">문제</span>
                         </div>
+                        
                         <div class="problem-count-row">
-                            <label>서술형:</label>
-                            <input type="number" id="hwNewEssay" min="0" value="0" onchange="updateHomeworkTotals()">
-                            <span class="max-info">최대 <span id="hwMaxNewEssay">0</span>개</span>
-                        </div>
-                        <div class="problem-count-row">
-                            <label>1등급:</label>
-                            <input type="number" id="hwNewGrade1" min="0" value="0" onchange="updateHomeworkTotals()">
-                            <span class="max-info">최대 <span id="hwMaxNewGrade1">0</span>개</span>
-                        </div>
-                        <div style="text-align: right; margin-top: 10px;">
-                            <strong style="font-size: 16px;">소계: <span id="hwNewTotal">0</span>개</strong>
+                            <label>1등급</label>
+                            <input type="number" id="hwGrade1" value="0" min="0">
+                            <span class="max-info">문제</span>
                         </div>
                         
-                        <div class="divider"></div>
-                        
-                        <div class="total-summary">
-                            총합: <span id="hwGrandTotal">0</span>개
-                        </div>
-                        
-                        <button type="submit">숙제 부여하기</button>
+                        <button type="submit" style="margin-top: 20px;">✅ 숙제 등록</button>
                     </div>
+                    
+                    <div id="hwMessage"></div>
                 </form>
-            </div>
+            </section>
             
             <!-- 진단평가 출제 섹션 -->
-            <div class="content-section" id="diagnosticSection">
-                <h2>📊 진단평가 출제</h2>
-                
-                <div id="diagMessage"></div>
+            <section id="diagnosticSection" class="content-section">
+                <h2>🔍 진단평가 출제</h2>
                 
                 <form id="diagForm">
                     <div class="form-group">
-                        <label for="diagGradeSelect">1단계: 학년 선택</label>
-                        <select id="diagGradeSelect" required onchange="onGradeChange('diag')">
+                        <label>학년 선택</label>
+                        <select id="diagGrade" required>
                             <option value="">학년을 선택하세요</option>
-                            <option value="중1">중1</option>
-                            <option value="중2">중2</option>
-                            <option value="중3">중3</option>
-                            <option value="고1">고1</option>
-                            <option value="고2">고2</option>
-                            <option value="고3">고3</option>
+                            <option value="1">1학년</option>
+                            <option value="2">2학년</option>
+                            <option value="3">3학년</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label>2단계: 학생 선택</label>
-                        <div class="list-box" id="diagStudentList">
-                            <p style="color: #999; text-align: center;">학년을 먼저 선택하세요</p>
+                        <label>학생 선택</label>
+                        <div id="diagStudentList" class="list-box">
+                            <p style="color: #999; text-align: center; padding: 20px;">학년을 먼저 선택하세요</p>
                         </div>
                     </div>
                     
-                    <div class="form-group" id="diagBookGroup" style="display: none;">
-                        <label>3단계: 문제집 선택</label>
-                        <div class="list-box" id="diagBookList">
-                            <p style="color: #999; text-align: center;">학생을 먼저 선택하세요</p>
+                    <div class="form-group">
+                        <label>문제집 선택</label>
+                        <div id="diagBookList" class="list-box">
+                            <p style="color: #999; text-align: center; padding: 20px;">학생을 먼저 선택하세요</p>
                         </div>
                     </div>
                     
                     <div class="divider"></div>
                     
-                    <h3 style="font-size: 18px; margin-bottom: 15px; color: #667eea;">📝 출제 범위</h3>
-                    <div id="rangeContainer">
-                        <div class="range-item">
-                            <div class="range-inputs">
-                                <label style="margin: 0; min-width: 60px;">구간 1:</label>
-                                <input type="number" class="range-start" min="1" placeholder="시작" required>
-                                <span>~</span>
-                                <input type="number" class="range-end" min="1" placeholder="끝" required>
+                    <div id="diagProblemSettings" style="display: none;">
+                        <h3 style="color: #667eea; margin-bottom: 20px;">📋 출제 설정</h3>
+                        
+                        <div class="form-group">
+                            <label>출제 범위 (여러 구간 가능)</label>
+                            <div id="rangeContainer">
+                                <div class="range-item" style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                                    <input type="number" class="range-start" placeholder="시작" style="width: 100px;" min="1">
+                                    <span>~</span>
+                                    <input type="number" class="range-end" placeholder="끝" style="width: 100px;" min="1">
+                                    <button type="button" class="danger" onclick="removeRange(this)">삭제</button>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <button type="button" class="secondary" onclick="addRange()">+ 범위 추가</button>
+                                <!-- 🔥 구간 조회 버튼을 여기로 이동 -->
+                                <button type="button" class="check-range" onclick="checkRangeContent()">🔍 구간 조회</button>
                             </div>
                         </div>
-                    </div>
-                    <button type="button" class="add-range-btn" onclick="addRange()">+ 구간 추가</button>
-                    
-                    <div class="divider"></div>
-                    
-                    <h3 style="font-size: 18px; margin-bottom: 15px; color: #667eea;">📋 문제 구성 (랜덤 출제)</h3>
-                    <div class="info-box">
-                        ℹ️ 일반유형: 각 그룹의 <strong>대표+터프</strong> 문제가 자동 출제됩니다
-                    </div>
-                    <div class="problem-count-row">
-                        <label>일반유형 그룹:</label>
-                        <input type="number" id="diagGroupCount" min="0" value="3" onchange="updateDiagTotal()">
-                        <span style="font-size: 13px; color: #999;">개 (각 그룹당 2문제)</span>
-                    </div>
-                    <div class="problem-count-row">
-                        <label>서술형:</label>
-                        <input type="number" id="diagEssay" min="0" value="2" onchange="updateDiagTotal()">
-                        <span style="font-size: 13px; color: #999;">문제</span>
-                    </div>
-                    <div class="problem-count-row">
-                        <label>1등급:</label>
-                        <input type="number" id="diagGrade1" min="0" value="2" onchange="updateDiagTotal()">
-                        <span style="font-size: 13px; color: #999;">문제</span>
-                    </div>
-                    
-                    <div class="divider"></div>
-                    
-                    <div class="total-summary">
-                        총 출제: <span id="diagTotal">8</span>문제
-                        <div style="font-size: 14px; margin-top: 8px; opacity: 0.9;">
-                            (일반 6 + 서술 2 + 1등급 2)
+                        
+                        <!-- 🔥 조회 결과 박스 추가 -->
+                        <div id="rangeResultBox" class="range-result-box">
+                            <h3>📊 구간 내 문제 현황</h3>
+                            <div class="range-result-grid">
+                                <div class="range-result-item">
+                                    <div class="label">일반 유형</div>
+                                    <div class="value" id="resultGeneral">0</div>
+                                    <span class="unit">개</span>
+                                </div>
+                                <div class="range-result-item">
+                                    <div class="label">서술형</div>
+                                    <div class="value" id="resultEssay">0</div>
+                                    <span class="unit">개</span>
+                                </div>
+                                <div class="range-result-item">
+                                    <div class="label">1등급</div>
+                                    <div class="value" id="resultGrade1">0</div>
+                                    <span class="unit">개</span>
+                                </div>
+                            </div>
                         </div>
+                        
+                        <div class="divider"></div>
+                        
+                        <div class="problem-count-row">
+                            <label>대표 문제 (그룹)</label>
+                            <input type="number" id="diagGroupCount" value="0" min="0">
+                            <span class="max-info">그룹</span>
+                        </div>
+                        
+                        <div class="problem-count-row">
+                            <label>서술형</label>
+                            <input type="number" id="diagEssay" value="0" min="0">
+                            <span class="max-info">문제</span>
+                        </div>
+                        
+                        <div class="problem-count-row">
+                            <label>1등급 (도전)</label>
+                            <input type="number" id="diagGrade1" value="0" min="0">
+                            <span class="max-info">문제</span>
+                        </div>
+                        
+                        <button type="submit" style="margin-top: 20px;">🎯 진단평가 출제</button>
                     </div>
                     
-                    <button type="submit">📄 진단평가 출제 및 워드 생성</button>
+                    <div id="diagMessage"></div>
                 </form>
-            </div>
-        </div>
+            </section>
+            
+            <!-- 결과 조회 섹션 -->
+            <section id="resultsSection" class="content-section">
+                <h2>📊 결과 조회</h2>
+                <p style="color: #666; font-size: 15px;">학생별 숙제 제출 현황과 오답 현황을 조회할 수 있습니다.</p>
+                <div style="margin-top: 30px; padding: 40px; background: #f9f9f9; border-radius: 10px; text-align: center;">
+                    <p style="color: #999;">🚧 개발 중입니다</p>
+                </div>
+            </section>
+        </main>
     </div>
-    
+
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycby8MLN2_4ix8I3xDHmnCZzoi-R-rg2rWR5zO_g4ywneigLB2Y1lF-aIiMuve3MUgW8/exec';
-        
-        let currentTeacher = {
-            id: '',
-            name: ''
-        };
-        
-        let allStudents = [];
-        let callbackCounter = 0;
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxEgwMj29wd-rAmfyWRp6GxEoFVn5TDQCvWg3RVT0Xo3fqc0srvMpwAaRBV1d97-fv5/exec';
         
         let hwSelectedStudent = null;
         let hwSelectedBook = null;
-        let hwStudentStatus = null;
-        
         let diagSelectedStudent = null;
         let diagSelectedBook = null;
         
-        // 페이지 로드
-        window.onload = function() {
-            const teacherId = sessionStorage.getItem('teacherId');
-            const teacherName = sessionStorage.getItem('teacherName');
+        // API 호출 공통 함수
+        async function callAPI(action, params = {}) {
+            const url = new URL(API_URL);
+            url.searchParams.append('action', action);
             
-            if (!teacherId || !teacherName) {
-                alert('로그인이 필요합니다.');
-                window.location.href = 'index.html';
-                return;
-            }
-            
-            currentTeacher.id = teacherId;
-            currentTeacher.name = teacherName;
-            document.getElementById('teacherName').textContent = teacherName;
-            
-            loadStudents();
-        };
-        
-        // 섹션 전환
-        function showSection(section) {
-            // 메뉴 활성화
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-            
-            // 섹션 표시
-            document.querySelectorAll('.content-section').forEach(sec => {
-                sec.classList.remove('active');
+            Object.keys(params).forEach(key => {
+                url.searchParams.append(key, params[key]);
             });
             
-            if (section === 'homework') {
-                document.getElementById('homeworkSection').classList.add('active');
-            } else if (section === 'diagnostic') {
-                document.getElementById('diagnosticSection').classList.add('active');
-            }
+            const response = await fetch(url);
+            return await response.json();
         }
         
         // 진행 상황 표시
@@ -690,317 +658,313 @@
             progressStatus.classList.remove('active');
         }
         
-        // JSONP API 호출
-        function callAPI(action, params = {}) {
-            return new Promise((resolve, reject) => {
-                const callbackName = 'jsonpCallback' + (callbackCounter++);
-                
-                window[callbackName] = function(data) {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    resolve(data);
-                };
-                
-                const queryParams = new URLSearchParams({
-                    action: action,
-                    callback: callbackName,
-                    ...params
-                });
-                
-                const script = document.createElement('script');
-                script.src = `${API_URL}?${queryParams.toString()}`;
-                script.onerror = () => {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    reject(new Error('API 호출 실패'));
-                };
-                
-                document.body.appendChild(script);
-            });
+        // 섹션 전환
+        function showSection(section) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            
+            if (section === 'homework') {
+                document.getElementById('homeworkSection').classList.add('active');
+                document.querySelectorAll('.menu-item')[0].classList.add('active');
+            } else if (section === 'diagnostic') {
+                document.getElementById('diagnosticSection').classList.add('active');
+                document.querySelectorAll('.menu-item')[1].classList.add('active');
+            } else if (section === 'results') {
+                document.getElementById('resultsSection').classList.add('active');
+                document.querySelectorAll('.menu-item')[2].classList.add('active');
+            }
         }
         
-        // 학생 목록 로드
-        async function loadStudents() {
+        // 숙제 - 학년 선택
+        document.getElementById('hwGrade').addEventListener('change', async (e) => {
+            const grade = e.target.value;
+            if (!grade) return;
+            
+            showProgress('학생 목록 불러오는 중...');
+            
             try {
-                const data = await callAPI('getStudentsWithGrade');
-                allStudents = data.students;
-                console.log('학생 목록:', allStudents);
-            } catch (error) {
-                console.error('학생 목록 로딩 실패:', error);
-            }
-        }
-        
-        // 학년 선택
-        function onGradeChange(type) {
-            const gradeSelect = document.getElementById(type === 'homework' ? 'hwGradeSelect' : 'diagGradeSelect');
-            const studentList = document.getElementById(type === 'homework' ? 'hwStudentList' : 'diagStudentList');
-            const selectedGrade = gradeSelect.value;
-            
-            if (type === 'homework') {
-                hwSelectedStudent = null;
-                hwSelectedBook = null;
-                document.getElementById('hwBookGroup').style.display = 'none';
-                document.getElementById('hwStudentStatus').classList.add('hidden');
-                document.getElementById('hwComposition').classList.add('hidden');
-            } else {
-                diagSelectedStudent = null;
-                diagSelectedBook = null;
-                document.getElementById('diagBookGroup').style.display = 'none';
-            }
-            
-            if (!selectedGrade) {
-                studentList.innerHTML = '<p style="color: #999; text-align: center;">학년을 먼저 선택하세요</p>';
-                return;
-            }
-            
-            const gradeStudents = allStudents.filter(s => s.grade === selectedGrade);
-            
-            if (gradeStudents.length === 0) {
-                studentList.innerHTML = '<p style="color: #999; text-align: center;">해당 학년에 학생이 없습니다.</p>';
-                return;
-            }
-            
-            studentList.innerHTML = '';
-            
-            gradeStudents.forEach(student => {
-                const div = document.createElement('div');
-                div.className = 'list-item';
+                const data = await callAPI('getStudentsByGrade', { grade });
                 
-                if (type === 'homework') {
-                    div.innerHTML = `
-                        <input type="radio" name="hwStudent" id="hw_${student.id}" value="${student.id}" onchange="onStudentSelect('${student.id}')">
-                        <label for="hw_${student.id}" style="cursor: pointer; margin: 0;">
-                            ${student.id} - ${student.name}
+                const listDiv = document.getElementById('hwStudentList');
+                if (data.students && data.students.length > 0) {
+                    listDiv.innerHTML = data.students.map(student => `
+                        <label class="list-item">
+                            <input type="radio" name="hwStudent" value="${student.id}">
+                            <span>${student.name}</span>
                         </label>
-                    `;
+                    `).join('');
+                    
+                    // 라디오 버튼 이벤트
+                    document.querySelectorAll('input[name="hwStudent"]').forEach(radio => {
+                        radio.addEventListener('change', loadHwBooks);
+                    });
                 } else {
-                    div.innerHTML = `
-                        <input type="radio" name="diagStudent" id="diag_${student.id}" value="${student.id}" onchange="onDiagStudentSelect('${student.id}')">
-                        <label for="diag_${student.id}" style="cursor: pointer; margin: 0;">
-                            ${student.id} - ${student.name}
-                        </label>
-                    `;
+                    listDiv.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">학생이 없습니다</p>';
                 }
                 
-                studentList.appendChild(div);
-            });
-        }
-        
-        // 숙제: 학생 선택
-        function onStudentSelect(studentId) {
-            hwSelectedStudent = studentId;
-            hwSelectedBook = null;
-            
-            const student = allStudents.find(s => s.id === studentId);
-            
-            if (!student || !student.books || student.books.length === 0) {
-                alert('해당 학생의 문제집 정보가 없습니다.');
-                return;
-            }
-            
-            const bookList = document.getElementById('hwBookList');
-            bookList.innerHTML = '';
-            
-            student.books.forEach(bookName => {
-                const div = document.createElement('div');
-                div.className = 'list-item';
-                div.innerHTML = `
-                    <input type="radio" name="hwBook" id="hwbook_${bookName}" value="${bookName}" onchange="onBookSelect('${bookName}')">
-                    <label for="hwbook_${bookName}" style="cursor: pointer; margin: 0;">
-                        ${bookName}
-                    </label>
-                `;
-                bookList.appendChild(div);
-            });
-            
-            document.getElementById('hwBookGroup').style.display = 'block';
-            document.getElementById('hwStudentStatus').classList.add('hidden');
-            document.getElementById('hwComposition').classList.add('hidden');
-        }
-        
-        // 숙제: 문제집 선택
-        async function onBookSelect(bookName) {
-            hwSelectedBook = bookName;
-            
-            const student = allStudents.find(s => s.id === hwSelectedStudent);
-            
-            document.getElementById('hwStudentNameDisplay').textContent = student.name;
-            document.getElementById('hwBookNameDisplay').textContent = bookName;
-            
-            showProgress('학생 현황 조회 중...');
-            
-            try {
-                const data = await callAPI('getStudentStatus', {
-                    student_id: hwSelectedStudent,
-                    book_name: bookName
-                });
-                
                 hideProgress();
-                
-                hwStudentStatus = data;
-                
-                document.getElementById('hwWrongGeneral').textContent = data.wrong.일반유형 + '개';
-                document.getElementById('hwWrongEssay').textContent = data.wrong.서술형 + '개';
-                document.getElementById('hwWrongGrade1').textContent = data.wrong['1등급'] + '개';
-                
-                document.getElementById('hwUnsolvedGeneral').textContent = data.unsolved.일반유형 + '개';
-                document.getElementById('hwUnsolvedEssay').textContent = data.unsolved.서술형 + '개';
-                document.getElementById('hwUnsolvedGrade1').textContent = data.unsolved['1등급'] + '개';
-                
-                document.getElementById('hwMaxReviewGeneral').textContent = data.wrong.일반유형;
-                document.getElementById('hwMaxReviewEssay').textContent = data.wrong.서술형;
-                document.getElementById('hwMaxReviewGrade1').textContent = data.wrong['1등급'];
-                
-                document.getElementById('hwMaxNewGeneral').textContent = data.unsolved.일반유형;
-                document.getElementById('hwMaxNewEssay').textContent = data.unsolved.서술형;
-                document.getElementById('hwMaxNewGrade1').textContent = data.unsolved['1등급'];
-                
-                document.getElementById('hwReviewGeneral').max = data.wrong.일반유형;
-                document.getElementById('hwReviewEssay').max = data.wrong.서술형;
-                document.getElementById('hwReviewGrade1').max = data.wrong['1등급'];
-                
-                document.getElementById('hwNewGeneral').max = data.unsolved.일반유형;
-                document.getElementById('hwNewEssay').max = data.unsolved.서술형;
-                document.getElementById('hwNewGrade1').max = data.unsolved['1등급'];
-                
-                document.getElementById('hwStudentStatus').classList.remove('hidden');
-                document.getElementById('hwComposition').classList.remove('hidden');
-                
-                updateHomeworkTotals();
             } catch (error) {
                 hideProgress();
-                showMessage('homeworkMessage', '학생 현황 조회 실패', 'error');
-                console.error(error);
+                alert('학생 목록 불러오기 실패: ' + error.message);
+            }
+        });
+        
+        // 숙제 - 문제집 불러오기
+        async function loadHwBooks() {
+            const selectedRadio = document.querySelector('input[name="hwStudent"]:checked');
+            if (!selectedRadio) return;
+            
+            hwSelectedStudent = selectedRadio.value;
+            
+            showProgress('문제집 목록 불러오는 중...');
+            
+            try {
+                const data = await callAPI('getStudentBooks', { student_id: hwSelectedStudent });
+                
+                const listDiv = document.getElementById('hwBookList');
+                if (data.books && data.books.length > 0) {
+                    listDiv.innerHTML = data.books.map(book => `
+                        <label class="list-item">
+                            <input type="radio" name="hwBook" value="${book}">
+                            <span>${book}</span>
+                        </label>
+                    `).join('');
+                    
+                    // 라디오 버튼 이벤트
+                    document.querySelectorAll('input[name="hwBook"]').forEach(radio => {
+                        radio.addEventListener('change', () => {
+                            hwSelectedBook = radio.value;
+                            document.getElementById('hwProblemSettings').style.display = 'block';
+                        });
+                    });
+                } else {
+                    listDiv.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">등록된 문제집이 없습니다</p>';
+                }
+                
+                hideProgress();
+            } catch (error) {
+                hideProgress();
+                alert('문제집 불러오기 실패: ' + error.message);
             }
         }
         
-        // 진단평가: 학생 선택
-        function onDiagStudentSelect(studentId) {
-            diagSelectedStudent = studentId;
-            diagSelectedBook = null;
-            
-            const student = allStudents.find(s => s.id === studentId);
-            
-            if (!student || !student.books || student.books.length === 0) {
-                alert('해당 학생의 문제집 정보가 없습니다.');
-                return;
-            }
-            
-            const bookList = document.getElementById('diagBookList');
-            bookList.innerHTML = '';
-            
-            student.books.forEach(bookName => {
-                const div = document.createElement('div');
-                div.className = 'list-item';
-                div.innerHTML = `
-                    <input type="radio" name="diagBook" id="diagbook_${bookName}" value="${bookName}" onchange="onDiagBookSelect('${bookName}')">
-                    <label for="diagbook_${bookName}" style="cursor: pointer; margin: 0;">
-                        ${bookName}
-                    </label>
-                `;
-                bookList.appendChild(div);
-            });
-            
-            document.getElementById('diagBookGroup').style.display = 'block';
-        }
-        
-        // 진단평가: 문제집 선택
-        function onDiagBookSelect(bookName) {
-            diagSelectedBook = bookName;
-        }
-        
-        // 숙제 합계 업데이트
-        function updateHomeworkTotals() {
-            const reviewGeneral = parseInt(document.getElementById('hwReviewGeneral').value) || 0;
-            const reviewEssay = parseInt(document.getElementById('hwReviewEssay').value) || 0;
-            const reviewGrade1 = parseInt(document.getElementById('hwReviewGrade1').value) || 0;
-            
-            const newGeneral = parseInt(document.getElementById('hwNewGeneral').value) || 0;
-            const newEssay = parseInt(document.getElementById('hwNewEssay').value) || 0;
-            const newGrade1 = parseInt(document.getElementById('hwNewGrade1').value) || 0;
-            
-            const reviewTotal = reviewGeneral + reviewEssay + reviewGrade1;
-            const newTotal = newGeneral + newEssay + newGrade1;
-            const grandTotal = reviewTotal + newTotal;
-            
-            document.getElementById('hwReviewTotal').textContent = reviewTotal;
-            document.getElementById('hwNewTotal').textContent = newTotal;
-            document.getElementById('hwGrandTotal').textContent = grandTotal;
-        }
-        
-        // 진단평가: 구간 추가
-        let rangeCount = 1;
-        function addRange() {
-            rangeCount++;
-            const container = document.getElementById('rangeContainer');
-            const div = document.createElement('div');
-            div.className = 'range-item';
-            div.innerHTML = `
-                <div class="range-inputs">
-                    <label style="margin: 0; min-width: 60px;">구간 ${rangeCount}:</label>
-                    <input type="number" class="range-start" min="1" placeholder="시작" required>
-                    <span>~</span>
-                    <input type="number" class="range-end" min="1" placeholder="끝" required>
-                    <button type="button" class="danger" onclick="this.parentElement.parentElement.remove(); updateDiagTotal();">X 삭제</button>
-                </div>
-            `;
-            container.appendChild(div);
-        }
-        
-        // 진단평가 총 문제 수 업데이트
-        function updateDiagTotal() {
-            const groupCount = parseInt(document.getElementById('diagGroupCount').value) || 0;
-            const essay = parseInt(document.getElementById('diagEssay').value) || 0;
-            const grade1 = parseInt(document.getElementById('diagGrade1').value) || 0;
-            
-            const total = (groupCount * 2) + essay + grade1;
-            document.getElementById('diagTotal').textContent = total;
-        }
-        
-        // 숙제 부여 제출
+        // 숙제 제출
         document.getElementById('homeworkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             if (!hwSelectedStudent || !hwSelectedBook) {
-                showMessage('homeworkMessage', '학생과 문제집을 선택하세요.', 'error');
+                showMessage('hwMessage', '학생과 문제집을 선택하세요.', 'error');
                 return;
             }
             
-            const reviewCounts = {
-                일반유형: parseInt(document.getElementById('hwReviewGeneral').value) || 0,
-                서술형: parseInt(document.getElementById('hwReviewEssay').value) || 0,
-                '1등급': parseInt(document.getElementById('hwReviewGrade1').value) || 0
-            };
+            const rangeStart = parseInt(document.getElementById('hwRangeStart').value);
+            const rangeEnd = parseInt(document.getElementById('hwRangeEnd').value);
             
-            const newCounts = {
-                일반유형: parseInt(document.getElementById('hwNewGeneral').value) || 0,
-                서술형: parseInt(document.getElementById('hwNewEssay').value) || 0,
-                '1등급': parseInt(document.getElementById('hwNewGrade1').value) || 0
-            };
+            if (!rangeStart || !rangeEnd || rangeStart > rangeEnd) {
+                showMessage('hwMessage', '올바른 범위를 입력하세요.', 'error');
+                return;
+            }
             
-            showProgress('숙제 부여 중...');
+            const general = parseInt(document.getElementById('hwGeneral').value) || 0;
+            const essay = parseInt(document.getElementById('hwEssay').value) || 0;
+            const grade1 = parseInt(document.getElementById('hwGrade1').value) || 0;
+            
+            if (general === 0 && essay === 0 && grade1 === 0) {
+                showMessage('hwMessage', '최소 1문제 이상 출제해야 합니다.', 'error');
+                return;
+            }
+            
+            showProgress('📝 숙제 등록 중...');
+            showMessage('hwMessage', '⏳ 숙제를 등록하고 있습니다...', 'success');
             
             try {
-                const data = await callAPI('assignHomework', {
+                const data = await callAPI('registerHomework', {
                     student_id: hwSelectedStudent,
                     book_name: hwSelectedBook,
-                    review_counts: JSON.stringify(reviewCounts),
-                    new_counts: JSON.stringify(newCounts)
+                    range_start: rangeStart,
+                    range_end: rangeEnd,
+                    general_count: general,
+                    essay_count: essay,
+                    grade1_count: grade1
                 });
                 
                 hideProgress();
                 
                 if (data.success) {
-                    showMessage('homeworkMessage', `✅ ${data.message}`, 'success');
+                    showMessage('hwMessage', `✅ ${data.message}`, 'success');
+                    
+                    // 폼 초기화
+                    document.getElementById('hwRangeStart').value = '';
+                    document.getElementById('hwRangeEnd').value = '';
+                    document.getElementById('hwGeneral').value = '0';
+                    document.getElementById('hwEssay').value = '0';
+                    document.getElementById('hwGrade1').value = '0';
                 } else {
-                    showMessage('homeworkMessage', data.message, 'error');
+                    showMessage('hwMessage', data.message, 'error');
                 }
             } catch (error) {
                 hideProgress();
-                showMessage('homeworkMessage', '숙제 부여 실패', 'error');
+                showMessage('hwMessage', '숙제 등록 실패: ' + error.message, 'error');
                 console.error(error);
             }
         });
+        
+        // 진단평가 - 학년 선택
+        document.getElementById('diagGrade').addEventListener('change', async (e) => {
+            const grade = e.target.value;
+            if (!grade) return;
+            
+            showProgress('학생 목록 불러오는 중...');
+            
+            try {
+                const data = await callAPI('getStudentsByGrade', { grade });
+                
+                const listDiv = document.getElementById('diagStudentList');
+                if (data.students && data.students.length > 0) {
+                    listDiv.innerHTML = data.students.map(student => `
+                        <label class="list-item">
+                            <input type="radio" name="diagStudent" value="${student.id}">
+                            <span>${student.name}</span>
+                        </label>
+                    `).join('');
+                    
+                    // 라디오 버튼 이벤트
+                    document.querySelectorAll('input[name="diagStudent"]').forEach(radio => {
+                        radio.addEventListener('change', loadDiagBooks);
+                    });
+                } else {
+                    listDiv.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">학생이 없습니다</p>';
+                }
+                
+                hideProgress();
+            } catch (error) {
+                hideProgress();
+                alert('학생 목록 불러오기 실패: ' + error.message);
+            }
+        });
+        
+        // 진단평가 - 문제집 불러오기
+        async function loadDiagBooks() {
+            const selectedRadio = document.querySelector('input[name="diagStudent"]:checked');
+            if (!selectedRadio) return;
+            
+            diagSelectedStudent = selectedRadio.value;
+            
+            showProgress('문제집 목록 불러오는 중...');
+            
+            try {
+                const data = await callAPI('getStudentBooks', { student_id: diagSelectedStudent });
+                
+                const listDiv = document.getElementById('diagBookList');
+                if (data.books && data.books.length > 0) {
+                    listDiv.innerHTML = data.books.map(book => `
+                        <label class="list-item">
+                            <input type="radio" name="diagBook" value="${book}">
+                            <span>${book}</span>
+                        </label>
+                    `).join('');
+                    
+                    // 라디오 버튼 이벤트
+                    document.querySelectorAll('input[name="diagBook"]').forEach(radio => {
+                        radio.addEventListener('change', () => {
+                            diagSelectedBook = radio.value;
+                            document.getElementById('diagProblemSettings').style.display = 'block';
+                        });
+                    });
+                } else {
+                    listDiv.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">등록된 문제집이 없습니다</p>';
+                }
+                
+                hideProgress();
+            } catch (error) {
+                hideProgress();
+                alert('문제집 불러오기 실패: ' + error.message);
+            }
+        }
+        
+        // 범위 추가
+        function addRange() {
+            const container = document.getElementById('rangeContainer');
+            const newRange = document.createElement('div');
+            newRange.className = 'range-item';
+            newRange.style.cssText = 'display: flex; gap: 10px; align-items: center; margin-bottom: 10px;';
+            newRange.innerHTML = `
+                <input type="number" class="range-start" placeholder="시작" style="width: 100px;" min="1">
+                <span>~</span>
+                <input type="number" class="range-end" placeholder="끝" style="width: 100px;" min="1">
+                <button type="button" class="danger" onclick="removeRange(this)">삭제</button>
+            `;
+            container.appendChild(newRange);
+        }
+        
+        // 범위 삭제
+        function removeRange(button) {
+            const container = document.getElementById('rangeContainer');
+            if (container.children.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('최소 1개의 범위는 필요합니다.');
+            }
+        }
+        
+        // 🔥 구간 조회 함수 추가
+        async function checkRangeContent() {
+            if (!diagSelectedStudent) {
+                alert('학생을 먼저 선택하세요.');
+                return;
+            }
+            
+            if (!diagSelectedBook) {
+                alert('문제집을 먼저 선택하세요.');
+                return;
+            }
+            
+            const ranges = [];
+            document.querySelectorAll('.range-item').forEach(item => {
+                const start = parseInt(item.querySelector('.range-start').value);
+                const end = parseInt(item.querySelector('.range-end').value);
+                if (start && end && start <= end) {
+                    ranges.push({ start, end });
+                }
+            });
+            
+            if (ranges.length === 0) {
+                alert('출제 범위를 입력하세요.');
+                return;
+            }
+            
+            showProgress('🔍 구간 조회 중...');
+            
+            try {
+                const data = await callAPI('checkRangeContent', {
+                    student_id: diagSelectedStudent,
+                    book_name: diagSelectedBook,
+                    ranges: JSON.stringify(ranges)
+                });
+                
+                hideProgress();
+                
+                if (data.success) {
+                    // 결과 박스 표시
+                    const resultBox = document.getElementById('rangeResultBox');
+                    resultBox.classList.add('active');
+                    
+                    // 각 값 업데이트
+                    document.getElementById('resultGeneral').textContent = data.counts.general || 0;
+                    document.getElementById('resultEssay').textContent = data.counts.essay || 0;
+                    document.getElementById('resultGrade1').textContent = data.counts.grade1 || 0;
+                    
+                    // 부드럽게 스크롤
+                    resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    alert('구간 조회 실패: ' + data.message);
+                }
+            } catch (error) {
+                hideProgress();
+                alert('구간 조회 중 오류 발생: ' + error.message);
+                console.error(error);
+            }
+        }
         
         // 진단평가 제출
         document.getElementById('diagForm').addEventListener('submit', async (e) => {
@@ -1171,7 +1135,6 @@
     }
     
     .problem {
-      border: 1px solid #ddd;
       padding: 8px;
       display: flex;
       flex-direction: column;
@@ -1190,18 +1153,8 @@
     .problem img {
       width: 100%;
       height: auto;
-      max-height: calc(100% - 80px);
+      max-height: calc(100% - 40px);
       object-fit: contain;
-      margin-bottom: 8px;
-    }
-    
-    .answer-space {
-      margin-top: auto;
-      padding: 5px;
-      background: #f9f9f9;
-      border-left: 3px solid #667eea;
-      font-size: 12px;
-      flex-shrink: 0;
     }
     
     /* 인쇄용 스타일 */
@@ -1239,10 +1192,6 @@
         padding: 15mm 10mm 10mm 10mm;
         min-height: 297mm;
       }
-      
-      .problem {
-        border: 1px solid #333;
-      }
     }
   </style>
 </head>
@@ -1268,9 +1217,6 @@
         <div class="problem">
           <h3>문제 ${index + 1}. (원본 ${problemNum}번)</h3>
           <img src="problems/${bookName}/${paddedNum}.png" alt="문제 ${problemNum}">
-          <div class="answer-space">
-            <strong>답:</strong> _______________________
-          </div>
         </div>
       `;
       

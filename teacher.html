@@ -734,7 +734,8 @@
                     document.querySelectorAll('input[name="hwBook"]').forEach(radio => {
                         radio.addEventListener('change', () => {
                             hwSelectedBook = radio.value;
-                            document.getElementById('hwProblemSettings').style.display = 'block';
+                            // 학생 현황 조회 후 숙제 설정 표시
+                            loadStudentStatus();
                         });
                     });
                 } else {
@@ -746,6 +747,81 @@
                 hideProgress();
                 alert('문제집 불러오기 실패: ' + error.message);
             }
+        }
+        
+        // 🔥 학생 현황 조회 (새로 추가!)
+        async function loadStudentStatus() {
+            showProgress('학생 현황 조회 중...');
+            
+            try {
+                const data = await callAPI('getStudentStatus', {
+                    student_id: hwSelectedStudent,
+                    book_name: hwSelectedBook
+                });
+                
+                hideProgress();
+                
+                if (data.success) {
+                    // 현황 정보 저장
+                    window.studentStatus = data.status;
+                    
+                    // 입력 필드에 max 값 설정
+                    document.getElementById('hwGeneral').max = data.status.review.general;
+                    document.getElementById('hwEssay').max = data.status.review.essay;
+                    document.getElementById('hwGrade1').max = data.status.review.grade1;
+                    
+                    // 숙제 설정 영역 표시
+                    document.getElementById('hwProblemSettings').style.display = 'block';
+                    
+                    // 현황 정보 표시 (숙제 설정 위에 추가)
+                    updateStatusDisplay(data.status);
+                } else {
+                    alert('학생 현황 조회 실패: ' + data.message);
+                }
+            } catch (error) {
+                hideProgress();
+                alert('학생 현황 조회 실패: ' + error.message);
+            }
+        }
+        
+        // 🔥 현황 정보 표시 함수 (새로 추가!)
+        function updateStatusDisplay(status) {
+            // 기존 현황 박스 제거
+            const existingStatus = document.getElementById('hwStatusDisplay');
+            if (existingStatus) existingStatus.remove();
+            
+            // 새 현황 박스 생성
+            const statusHTML = `
+                <div id="hwStatusDisplay" class="status-box" style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <h4 style="color: #667eea; font-size: 16px;">📊 ${hwSelectedStudent} - ${hwSelectedBook}</h4>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px;">
+                            <h5 style="color: #1976d2; margin-bottom: 10px; font-size: 14px;">🔄 복습 가능 (틀린 문제)</h5>
+                            <div style="font-size: 13px; line-height: 1.8;">
+                                <div>일반유형: <strong style="color: #667eea;">${status.review.general}개</strong></div>
+                                <div>서술형: <strong style="color: #667eea;">${status.review.essay}개</strong></div>
+                                <div>1등급: <strong style="color: #667eea;">${status.review.grade1}개</strong></div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #fff3e0; padding: 15px; border-radius: 8px;">
+                            <h5 style="color: #f57c00; margin-bottom: 10px; font-size: 14px;">✨ 안 푼 문제</h5>
+                            <div style="font-size: 13px; line-height: 1.8;">
+                                <div>일반유형: <strong style="color: #667eea;">${status.unsolved.general}개</strong></div>
+                                <div>서술형: <strong style="color: #667eea;">${status.unsolved.essay}개</strong></div>
+                                <div>1등급: <strong style="color: #667eea;">${status.unsolved.grade1}개</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // hwProblemSettings 앞에 삽입
+            const problemSettings = document.getElementById('hwProblemSettings');
+            problemSettings.insertAdjacentHTML('beforebegin', statusHTML);
         }
         
         // 숙제 제출

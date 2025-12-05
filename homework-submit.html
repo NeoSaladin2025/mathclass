@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .homework-submit {
+            padding: 20px;
+            max-width: 100%;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        /* 숙제 목록 카드 */
+        .homework-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .homework-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .homework-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .homework-card.selected {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .book-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .homework-info {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .submit-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        /* 제출 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        /* 범위 설정 */
+        .range-section {
+            margin-bottom: 30px;
+        }
+
+        .range-section h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .range-inputs {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .range-inputs input {
+            width: 100px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .range-inputs span {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .homework-range-info {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        /* 모드 전환 */
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* 바둑판 모드 */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .problem-btn {
+            padding: 15px 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .problem-btn:active {
+            transform: scale(0.95);
+        }
+
+        .problem-btn.wrong {
+            background: #ff4757;
+            color: white;
+            border-color: #ff4757;
+        }
+
+        .problem-btn.wrong::after {
+            content: ' ✗';
+        }
+
+        /* 리스트 모드 */
+        .problem-list {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .problem-list.active {
+            display: flex;
+        }
+
+        .problem-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .problem-item:hover {
+            background: #f8f9ff;
+        }
+
+        .problem-item.wrong {
+            background: #ffe5e8;
+            border-color: #ff4757;
+        }
+
+        .problem-checkbox {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .problem-number {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 선택 정보 */
+        .selection-info {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 2px solid #667eea;
+        }
+
+        .selection-info h4 {
+            font-size: 14px;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .selection-info p {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* 버튼 그룹 */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ee2737;
+        }
+
+        /* 팁 */
+        .tip {
+            background: #fff9e6;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+            border-left: 4px solid #ffd93d;
+        }
+
+        /* 로딩 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .modal-content {
+                max-width: 95%;
+                padding: 20px;
+            }
+
+            .problem-grid {
+                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+                gap: 8px;
+            }
+
+            .problem-btn {
+                padding: 12px 8px;
+                font-size: 14px;
+            }
+
+            .range-inputs {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .range-inputs input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="homework-submit">
+        <h1 class="page-title">📝 숙제 제출</h1>
+
+        <!-- 로딩 -->
+        <div id="loading" class="loading">
+            <p>숙제 목록을 불러오는 중...</p>
+        </div>
+
+        <!-- 숙제 목록 -->
+        <div id="homeworkList" class="homework-list" style="display: none;"></div>
+
+        <!-- 숙제 없음 -->
+        <div id="emptyState" class="empty" style="display: none;">
+            <div class="empty-icon">📭</div>
+            <h3>제출할 숙제가 없습니다</h3>
+            <p>선생님이 내주신 숙제가 없거나 모두 제출 완료했습니다.</p>
+        </div>
+    </div>
+
+    <!-- 제출 모달 -->
+    <div id="submitModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modalTitle">숙제 제출</div>
+
+            <!-- 범위 설정 -->
+            <div class="range-section">
+                <h3>1️⃣ 실제로 푼 범위 설정</h3>
+                <div class="homework-range-info" id="homeworkRangeInfo">
+                    숙제 범위: 로딩 중...
+                </div>
+                <div class="range-inputs">
+                    <input type="number" id="startNum" placeholder="시작">
+                    <span>~</span>
+                    <input type="number" id="endNum" placeholder="끝">
+                    <button class="btn btn-secondary" onclick="applyRange()">범위 적용</button>
+                </div>
+            </div>
+
+            <!-- 모드 전환 -->
+            <div class="mode-toggle">
+                <button class="mode-btn active" onclick="switchMode('grid')">
+                    🔲 바둑판 모드
+                </button>
+                <button class="mode-btn" onclick="switchMode('list')">
+                    📋 리스트 모드
+                </button>
+            </div>
+
+            <div class="tip">
+                💡 <strong>팁:</strong> 틀린 문제를 탭/클릭하면 ✗ 표시됩니다.
+            </div>
+
+            <!-- 바둑판 모드 -->
+            <div id="problemGrid" class="problem-grid"></div>
+
+            <!-- 리스트 모드 -->
+            <div id="problemList" class="problem-list"></div>
+
+            <!-- 선택 정보 -->
+            <div class="selection-info">
+                <h4>선택된 틀린 문제</h4>
+                <p id="selectionInfo">없음</p>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="selectAll()">전체선택</button>
+                <button class="btn btn-secondary" onclick="clearAll()">전체해제</button>
+                <button class="btn btn-danger" onclick="closeModal()">취소</button>
+                <button class="btn btn-primary" onclick="submitHomework()">제출</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
+        let currentHomework = null;
+        let wrongSet = new Set();
+        let currentMode = 'grid';
+        let rangeStart = 1;
+        let rangeEnd = 100;
+
+        // 페이지 로드
+        window.addEventListener('DOMContentLoaded', () => {
+            loadHomeworkList();
+        });
+
+        // 숙제 목록 로드
+        async function loadHomeworkList() {
+            try {
+                const studentId = sessionStorage.getItem('studentId');
+                if (!studentId) {
+                    alert('로그인이 필요합니다.');
+                    window.location.href = '/index.html';
+                    return;
+                }
+
+                const response = await fetch(`${API_URL}?action=getStudentHomework&studentId=${studentId}`);
+                const data = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (data.success && data.homeworks && data.homeworks.length > 0) {
+                    displayHomeworkList(data.homeworks);
+                } else {
+                    document.getElementById('emptyState').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('숙제 목록 로드 실패:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: red;">로드 실패. 새로고침해주세요.</p>';
+            }
+        }
+
+        // 숙제 목록 표시
+        function displayHomeworkList(homeworks) {
+            const container = document.getElementById('homeworkList');
+            container.innerHTML = '';
+            container.style.display = 'flex';
+
+            homeworks.forEach(hw => {
+                const card = document.createElement('div');
+                card.className = 'homework-card';
+                card.innerHTML = `
+                    <div class="book-title">📖 ${hw.bookName}</div>
+                    <div class="homework-info">
+                        숙제 범위: ${hw.minProblem}번 ~ ${hw.maxProblem}번<br>
+                        총 ${hw.totalCount}문제
+                    </div>
+                    <button class="submit-btn" onclick="openSubmitModal(${JSON.stringify(hw).replace(/"/g, '&quot;')})">
+                        제출하기
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 제출 모달 열기
+        function openSubmitModal(homework) {
+            currentHomework = homework;
+            wrongSet.clear();
+            
+            document.getElementById('modalTitle').textContent = `📖 ${homework.bookName}`;
+            document.getElementById('homeworkRangeInfo').textContent = 
+                `숙제 범위: ${homework.minProblem}번 ~ ${homework.maxProblem}번 (총 ${homework.totalCount}문제)`;
+            
+            document.getElementById('startNum').value = homework.minProblem;
+            document.getElementById('endNum').value = homework.maxProblem;
+            
+            rangeStart = homework.minProblem;
+            rangeEnd = homework.maxProblem;
+            
+            createProblemUI();
+            updateSelectionInfo();
+            
+            document.getElementById('submitModal').classList.add('active');
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('submitModal').classList.remove('active');
+            currentHomework = null;
+            wrongSet.clear();
+        }
+
+        // 범위 적용
+        function applyRange() {
+            const start = parseInt(document.getElementById('startNum').value);
+            const end = parseInt(document.getElementById('endNum').value);
+
+            if (!start || !end) {
+                alert('시작과 끝 번호를 모두 입력해주세요.');
+                return;
+            }
+
+            if (start < currentHomework.minProblem || end > currentHomework.maxProblem) {
+                alert(`범위는 ${currentHomework.minProblem}번 ~ ${currentHomework.maxProblem}번 내에서 설정해주세요.`);
+                return;
+            }
+
+            if (start > end) {
+                alert('시작 번호가 끝 번호보다 클 수 없습니다.');
+                return;
+            }
+
+            rangeStart = start;
+            rangeEnd = end;
+            wrongSet.clear();
+            createProblemUI();
+            updateSelectionInfo();
+            alert(`범위가 ${start}번 ~ ${end}번으로 설정되었습니다.`);
+        }
+
+        // 문제 UI 생성
+        function createProblemUI() {
+            if (currentMode === 'grid') {
+                createGridUI();
+            } else {
+                createListUI();
+            }
+        }
+
+        // 바둑판 UI 생성
+        function createGridUI() {
+            const grid = document.getElementById('problemGrid');
+            grid.innerHTML = '';
+            grid.style.display = 'grid';
+
+            for (let i = rangeStart; i <= rangeEnd; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'problem-btn';
+                btn.textContent = i;
+                if (wrongSet.has(i)) {
+                    btn.classList.add('wrong');
+                }
+                btn.onclick = () => toggleWrong(i);
+                grid.appendChild(btn);
+            }
+        }
+
+        // 리스트 UI 생성
+        function createListUI() {
+            const list = document.getElementById('problemList');
+            list.innerHTML = '';
+            list.style.display = 'flex';
+
+            for (let i = rangeStart; i <= rangeEnd; i++) {
+                const item = document.createElement('div');
+                item.className = 'problem-item';
+                if (wrongSet.has(i)) {
+                    item.classList.add('wrong');
+                }
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'problem-checkbox';
+                checkbox.checked = wrongSet.has(i);
+                checkbox.onchange = () => toggleWrong(i);
+
+                const number = document.createElement('span');
+                number.className = 'problem-number';
+                number.textContent = `${i}번`;
+
+                item.appendChild(checkbox);
+                item.appendChild(number);
+                item.onclick = (e) => {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        toggleWrong(i);
+                    }
+                };
+
+                list.appendChild(item);
+            }
+        }
+
+        // 모드 전환
+        function switchMode(mode) {
+            currentMode = mode;
+
+            // 버튼 상태 변경
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // UI 전환
+            if (mode === 'grid') {
+                document.getElementById('problemGrid').style.display = 'grid';
+                document.getElementById('problemList').style.display = 'none';
+                createGridUI();
+            } else {
+                document.getElementById('problemGrid').style.display = 'none';
+                document.getElementById('problemList').style.display = 'flex';
+                createListUI();
+            }
+        }
+
+        // 오답 토글
+        function toggleWrong(num) {
+            if (wrongSet.has(num)) {
+                wrongSet.delete(num);
+            } else {
+                wrongSet.add(num);
+            }
+            createProblemUI();
+            updateSelectionInfo();
+        }
+
+        // 전체 선택
+        function selectAll() {
+            for (let i = rangeStart; i <= rangeEnd; i++) {
+                wrongSet.add(i);
+            }
+            createProblemUI();
+            updateSelectionInfo();
+        }
+
+        // 전체 해제
+        function clearAll() {
+            wrongSet.clear();
+            createProblemUI();
+            updateSelectionInfo();
+        }
+
+        // 선택 정보 업데이트
+        function updateSelectionInfo() {
+            const info = document.getElementById('selectionInfo');
+            if (wrongSet.size === 0) {
+                info.textContent = '없음';
+            } else {
+                const sorted = Array.from(wrongSet).sort((a, b) => a - b);
+                info.textContent = `${sorted.join(', ')} (총 ${wrongSet.size}개)`;
+            }
+        }
+
+        // 숙제 제출
+        async function submitHomework() {
+            if (!confirm('정말 제출하시겠습니까?\n제출 후에는 수정할 수 없습니다.')) {
+                return;
+            }
+
+            try {
+                const studentId = sessionStorage.getItem('studentId');
+                const wrongList = Array.from(wrongSet).sort((a, b) => a - b).join(',');
+
+                const url = `${API_URL}?action=submitHomework&studentId=${studentId}&bookName=${encodeURIComponent(currentHomework.bookName)}&startNum=${rangeStart}&endNum=${rangeEnd}&wrongAnswers=${wrongList}`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ 숙제가 제출되었습니다!');
+                    closeModal();
+                    loadHomeworkList(); // 목록 새로고침
+                } else {
+                    alert('❌ 제출 실패: ' + (data.message || '알 수 없는 오류'));
+                }
+            } catch (error) {
+                console.error('제출 실패:', error);
+                alert('❌ 제출 중 오류가 발생했습니다.');
+            }
+        }
+    </script>
+</body>
+</html>

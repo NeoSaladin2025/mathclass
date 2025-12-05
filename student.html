@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학생 대시보드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        /* 레이아웃 */
+        .dashboard {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* 왼쪽 사이드바 */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+            transition: left 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 30px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .sidebar-header h1 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        
+        .sidebar-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* 프로필 영역 */
+        .profile-area {
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            margin: 20px;
+            border-radius: 10px;
+        }
+        
+        .profile-area .name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .profile-area .info {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+        
+        /* 메뉴 */
+        .menu {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+        
+        .menu-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+        }
+        
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            padding-left: 30px;
+        }
+        
+        .menu-item.active {
+            background: rgba(255,255,255,0.2);
+            border-left: 4px solid white;
+        }
+        
+        .menu-icon {
+            font-size: 20px;
+        }
+        
+        /* 로그아웃 버튼 */
+        .logout-btn {
+            margin: 20px;
+            padding: 12px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* 메인 컨텐츠 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #f5f7fa;
+            padding: 40px;
+        }
+        
+        /* 로딩 스피너 */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 100px 20px;
+            color: #667eea;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 🔥 햄버거 메뉴 버튼 */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: white;
+            margin: 5px 0;
+            border-radius: 3px;
+            transition: 0.3s;
+        }
+        
+        /* 오버레이 */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        
+        /* 📱 모바일 (0~767px) */
+        @media (max-width: 767px) {
+            .hamburger {
+                display: block;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .main-content {
+                padding: 80px 15px 20px 15px;
+                margin-left: 0;
+            }
+            
+            .sidebar-header h1 {
+                font-size: 18px;
+            }
+            
+            .menu-item {
+                padding: 18px 20px;
+            }
+        }
+        
+        /* 📱 태블릿 (768px~1023px) */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .sidebar {
+                width: 220px;
+            }
+            
+            .sidebar-header h1 {
+                font-size: 18px;
+            }
+            
+            .menu-item {
+                padding: 12px 15px;
+                font-size: 14px;
+            }
+            
+            .main-content {
+                padding: 30px 20px;
+            }
+        }
+        
+        /* 💻 작은 데스크탑 (1024px~1279px) */
+        @media (min-width: 1024px) and (max-width: 1279px) {
+            .sidebar {
+                width: 250px;
+            }
+            
+            .main-content {
+                padding: 35px;
+            }
+        }
+        
+        /* 가로모드 모바일 */
+        @media (max-width: 767px) and (orientation: landscape) {
+            .sidebar-header {
+                padding: 20px 15px;
+            }
+            
+            .sidebar-header h1 {
+                font-size: 16px;
+            }
+            
+            .menu-item {
+                padding: 10px 15px;
+                font-size: 13px;
+            }
+            
+            .profile-area {
+                padding: 15px;
+                margin: 15px;
+            }
+        }
+        
+        /* 터치 디바이스 최적화 */
+        @media (hover: none) and (pointer: coarse) {
+            .menu-item {
+                padding: 18px 20px;
+            }
+            
+            .logout-btn {
+                min-height: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🔥 햄버거 메뉴 버튼 -->
+    <button class="hamburger" onclick="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    
+    <!-- 🔥 오버레이 -->
+    <div class="overlay" onclick="toggleSidebar()"></div>
+    
+    <div class="dashboard">
+        <!-- 왼쪽 사이드바 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>📚 학생 대시보드</h1>
+                <p>오답 관리 시스템</p>
+            </div>
+            
+            <!-- 프로필 영역 -->
+            <div class="profile-area">
+                <div class="name" id="studentName">로딩중...</div>
+                <div class="info" id="studentInfo">학생</div>
+            </div>
+            
+            <!-- 메뉴 -->
+            <nav class="menu">
+                <div class="menu-item active" onclick="loadPage('homework-submit')">
+                    <span class="menu-icon">📝</span>
+                    <span>숙제 제출</span>
+                </div>
+                <div class="menu-item" onclick="loadPage('homework-list')">
+                    <span class="menu-icon">📋</span>
+                    <span>숙제 목록</span>
+                </div>
+                <div class="menu-item" onclick="loadPage('diag-submit')">
+                    <span class="menu-icon">🎯</span>
+                    <span>진단평가 제출</span>
+                </div>
+                <div class="menu-item" onclick="loadPage('mypage')">
+                    <span class="menu-icon">👤</span>
+                    <span>마이페이지</span>
+                </div>
+            </nav>
+            
+            <button class="logout-btn" onclick="logout()">🚪 로그아웃</button>
+        </aside>
+        
+        <!-- 메인 컨텐츠 -->
+        <main id="mainContent" class="main-content">
+            <!-- 로딩 스피너 -->
+            <div class="loading active">
+                <div class="spinner"></div>
+                <p>페이지를 불러오는 중...</p>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwlap6vDi2yKWRD4oYg3-H5E5HIbo7h0AVkrCP7KPBca0Jqn9KlGrk9VrMIysPokEPw/exec';
+        
+        let studentId = null;
+        let studentName = null;
+        
+        // 페이지 로드 시 학생 정보 확인
+        window.addEventListener('DOMContentLoaded', () => {
+            // 세션 스토리지에서 학생 정보 가져오기
+            studentId = sessionStorage.getItem('studentId');
+            studentName = sessionStorage.getItem('studentName');
+            
+            if (!studentId || !studentName) {
+                // 로그인 안 되어 있으면 로그인 페이지로
+                alert('로그인이 필요합니다.');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // 프로필 영역 업데이트
+            document.getElementById('studentName').textContent = studentName;
+            document.getElementById('studentInfo').textContent = `학번: ${studentId}`;
+            
+            // 첫 페이지 로드
+            loadPage('homework-submit');
+        });
+        
+        // 페이지 로드 함수
+        async function loadPage(pageName) {
+            const content = document.getElementById('mainContent');
+            const loading = content.querySelector('.loading');
+            
+            // 로딩 표시
+            if (loading) {
+                loading.classList.add('active');
+            } else {
+                content.innerHTML = '<div class="loading active"><div class="spinner"></div><p>페이지를 불러오는 중...</p></div>';
+            }
+            
+            try {
+                // 페이지 로드
+                const response = await fetch(`student/${pageName}.html`);
+                
+                if (!response.ok) {
+                    throw new Error('페이지를 찾을 수 없습니다.');
+                }
+                
+                const html = await response.text();
+                content.innerHTML = html;
+                
+                // 메뉴 active 상태 변경
+                document.querySelectorAll('.menu-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                event.currentTarget.classList.add('active');
+                
+                // 모바일에서 사이드바 닫기
+                if (window.innerWidth <= 767) {
+                    toggleSidebar();
+                }
+                
+            } catch (error) {
+                content.innerHTML = `
+                    <div style="text-align: center; padding: 100px 20px;">
+                        <h2 style="color: #e74c3c; margin-bottom: 20px;">❌ 오류 발생</h2>
+                        <p style="color: #666; margin-bottom: 20px;">${error.message}</p>
+                        <button onclick="loadPage('homework-submit')" style="padding: 12px 24px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                            홈으로 돌아가기
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        // 사이드바 토글 (모바일용)
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.overlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        
+        // 로그아웃
+        function logout() {
+            if (confirm('로그아웃 하시겠습니까?')) {
+                sessionStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // 메뉴 클릭 시 모바일에서 사이드바 자동 닫기
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 767) {
+                    toggleSidebar();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

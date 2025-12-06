@@ -20,17 +20,33 @@
             font-weight: bold;
             margin-bottom: 20px;
             color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* 숙제 목록 카드 */
-        .homework-list {
+        .back-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: #e0e0e0;
+        }
+
+        /* ===== 1단계: 문제집 목록 ===== */
+        .book-list {
             display: flex;
             flex-direction: column;
             gap: 15px;
-            margin-bottom: 20px;
         }
 
-        .homework-card {
+        .book-card {
             background: white;
             border: 2px solid #e0e0e0;
             border-radius: 12px;
@@ -39,30 +55,25 @@
             cursor: pointer;
         }
 
-        .homework-card:hover {
+        .book-card:hover {
             border-color: #667eea;
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
         }
 
-        .homework-card.selected {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-
-        .book-title {
-            font-size: 18px;
+        .book-name {
+            font-size: 20px;
             font-weight: bold;
             color: #333;
             margin-bottom: 10px;
         }
 
-        .homework-info {
+        .book-info {
             font-size: 14px;
             color: #666;
-            line-height: 1.8;
         }
 
-        .submit-btn {
+        .select-btn {
             background: #667eea;
             color: white;
             border: none;
@@ -74,54 +85,48 @@
             margin-top: 10px;
         }
 
-        .submit-btn:hover {
+        .select-btn:hover {
             background: #5568d3;
             transform: translateY(-2px);
         }
 
-        /* 제출 모달 */
-        .modal {
+        /* ===== 2단계: 숙제 제출 ===== */
+        .submit-section {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
         }
 
-        .modal.active {
-            display: flex;
+        .submit-section.active {
+            display: block;
         }
 
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-header {
-            font-size: 20px;
-            font-weight: bold;
-            color: #667eea;
+        .book-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
             margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .book-header h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .book-header p {
+            font-size: 14px;
+            opacity: 0.9;
         }
 
         /* 범위 설정 */
         .range-section {
-            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
         }
 
-        .range-section h3 {
+        .range-section h4 {
             font-size: 16px;
             color: #333;
             margin-bottom: 15px;
@@ -146,6 +151,21 @@
         .range-inputs span {
             font-size: 16px;
             color: #666;
+        }
+
+        .apply-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .apply-btn:hover {
+            background: #5568d3;
         }
 
         .homework-range-info {
@@ -319,15 +339,6 @@
             background: #e0e0e0;
         }
 
-        .btn-danger {
-            background: #ff4757;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #ee2737;
-        }
-
         /* 팁 */
         .tip {
             background: #fff9e6;
@@ -359,11 +370,6 @@
 
         /* 반응형 */
         @media (max-width: 768px) {
-            .modal-content {
-                max-width: 95%;
-                padding: 20px;
-            }
-
             .problem-grid {
                 grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
                 gap: 8px;
@@ -387,32 +393,40 @@
 </head>
 <body>
     <div class="homework-submit">
-        <h1 class="page-title">📝 숙제 제출</h1>
+        <!-- ===== 1단계: 문제집 목록 ===== -->
+        <div id="step1" class="step1-section">
+            <h1 class="page-title">📝 숙제 제출</h1>
 
-        <!-- 로딩 -->
-        <div id="loading" class="loading">
-            <p>숙제 목록을 불러오는 중...</p>
+            <!-- 로딩 -->
+            <div id="loading" class="loading">
+                <p>문제집 목록을 불러오는 중...</p>
+            </div>
+
+            <!-- 문제집 목록 -->
+            <div id="bookList" class="book-list" style="display: none;"></div>
+
+            <!-- 숙제 없음 -->
+            <div id="emptyState" class="empty" style="display: none;">
+                <div class="empty-icon">📭</div>
+                <h3>제출할 숙제가 없습니다</h3>
+                <p>선생님이 내주신 숙제가 없거나 모두 제출 완료했습니다.</p>
+            </div>
         </div>
 
-        <!-- 숙제 목록 -->
-        <div id="homeworkList" class="homework-list" style="display: none;"></div>
+        <!-- ===== 2단계: 숙제 제출 ===== -->
+        <div id="step2" class="submit-section">
+            <h1 class="page-title">
+                <button class="back-btn" onclick="goBack()">← 뒤로가기</button>
+            </h1>
 
-        <!-- 숙제 없음 -->
-        <div id="emptyState" class="empty" style="display: none;">
-            <div class="empty-icon">📭</div>
-            <h3>제출할 숙제가 없습니다</h3>
-            <p>선생님이 내주신 숙제가 없거나 모두 제출 완료했습니다.</p>
-        </div>
-    </div>
-
-    <!-- 제출 모달 -->
-    <div id="submitModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header" id="modalTitle">숙제 제출</div>
+            <div class="book-header">
+                <h3 id="selectedBookName">문제집</h3>
+                <p id="selectedBookInfo">숙제 범위: -</p>
+            </div>
 
             <!-- 범위 설정 -->
             <div class="range-section">
-                <h3>1️⃣ 실제로 푼 범위 설정</h3>
+                <h4>1️⃣ 실제로 푼 범위 설정</h4>
                 <div class="homework-range-info" id="homeworkRangeInfo">
                     숙제 범위: 로딩 중...
                 </div>
@@ -420,7 +434,7 @@
                     <input type="number" id="startNum" placeholder="시작">
                     <span>~</span>
                     <input type="number" id="endNum" placeholder="끝">
-                    <button class="btn btn-secondary" onclick="applyRange()">범위 적용</button>
+                    <button class="apply-btn" onclick="applyRange()">범위 적용</button>
                 </div>
             </div>
 
@@ -454,7 +468,6 @@
             <div class="button-group">
                 <button class="btn btn-secondary" onclick="selectAll()">전체선택</button>
                 <button class="btn btn-secondary" onclick="clearAll()">전체해제</button>
-                <button class="btn btn-danger" onclick="closeModal()">취소</button>
                 <button class="btn btn-primary" onclick="submitHomework()">제출</button>
             </div>
         </div>
@@ -463,7 +476,7 @@
     <script>
         // 전역 변수
         const API_URL = 'https://script.google.com/macros/s/AKfycbzj8Axn5cgdQtdWzgi2R1kWHieVNnrimLyR8T-w9w9glna9kh99gberr3ozJBLUtjCo/exec';
-        let currentHomework = null;
+        let currentBook = null;
         let wrongSet = new Set();
         let currentMode = 'grid';
         let rangeStart = 1;
@@ -501,11 +514,11 @@
 
         // 페이지 로드
         window.addEventListener('DOMContentLoaded', () => {
-            loadHomeworkList();
+            loadBookList();
         });
 
-        // 숙제 목록 로드
-        async function loadHomeworkList() {
+        // ===== 1단계: 문제집 목록 로드 =====
+        async function loadBookList() {
             try {
                 const studentId = sessionStorage.getItem('studentId');
                 if (!studentId) {
@@ -519,64 +532,86 @@
                 document.getElementById('loading').style.display = 'none';
 
                 if (data.success && data.homeworks && data.homeworks.length > 0) {
-                    displayHomeworkList(data.homeworks);
+                    displayBookList(data.homeworks);
                 } else {
                     document.getElementById('emptyState').style.display = 'block';
                 }
             } catch (error) {
-                console.error('숙제 목록 로드 실패:', error);
+                console.error('문제집 목록 로드 실패:', error);
                 document.getElementById('loading').innerHTML = '<p style="color: red;">로드 실패. 새로고침해주세요.</p>';
             }
         }
 
-        // 숙제 목록 표시
-        function displayHomeworkList(homeworks) {
-            const container = document.getElementById('homeworkList');
+        // 문제집 목록 표시
+        function displayBookList(homeworks) {
+            const container = document.getElementById('bookList');
             container.innerHTML = '';
             container.style.display = 'flex';
 
             homeworks.forEach(hw => {
                 const card = document.createElement('div');
-                card.className = 'homework-card';
+                card.className = 'book-card';
                 card.innerHTML = `
-                    <div class="book-title">📖 ${hw.bookName}</div>
-                    <div class="homework-info">
-                        숙제 범위: ${hw.minProblem}번 ~ ${hw.maxProblem}번<br>
-                        총 ${hw.totalCount}문제
-                    </div>
-                    <button class="submit-btn" onclick="openSubmitModal(${JSON.stringify(hw).replace(/"/g, '&quot;')})">
-                        제출하기
-                    </button>
+                    <div class="book-name">📖 ${hw.bookName}</div>
+                    <div class="book-info">숙제: ${hw.homeworkCount}문제</div>
+                    <button class="select-btn" onclick='selectBook("${hw.bookName}")'>선택</button>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // 제출 모달 열기
-        function openSubmitModal(homework) {
-            currentHomework = homework;
-            wrongSet.clear();
-            
-            document.getElementById('modalTitle').textContent = `📖 ${homework.bookName}`;
-            document.getElementById('homeworkRangeInfo').textContent = 
-                `숙제 범위: ${homework.minProblem}번 ~ ${homework.maxProblem}번 (총 ${homework.totalCount}문제)`;
-            
-            document.getElementById('startNum').value = homework.minProblem;
-            document.getElementById('endNum').value = homework.maxProblem;
-            
-            rangeStart = homework.minProblem;
-            rangeEnd = homework.maxProblem;
-            
-            createProblemUI();
-            updateSelectionInfo();
-            
-            document.getElementById('submitModal').classList.add('active');
+        // ===== 문제집 선택 → 2단계로 이동 =====
+        async function selectBook(bookName) {
+            try {
+                const studentId = sessionStorage.getItem('studentId');
+                
+                // 2단계로 전환
+                document.getElementById('step1').style.display = 'none';
+                document.getElementById('step2').classList.add('active');
+
+                // 선택한 문제집의 숙제 상세 조회
+                const data = await callAPI('getBookHomework', {
+                    studentId: studentId,
+                    bookName: bookName
+                });
+
+                if (!data.success) {
+                    alert('숙제 조회 실패: ' + data.message);
+                    goBack();
+                    return;
+                }
+
+                currentBook = data;
+                wrongSet.clear();
+
+                // UI 업데이트
+                document.getElementById('selectedBookName').textContent = `📖 ${data.bookName}`;
+                document.getElementById('selectedBookInfo').textContent = 
+                    `숙제 범위: ${data.minProblem}번 ~ ${data.maxProblem}번 (총 ${data.totalCount}문제)`;
+                document.getElementById('homeworkRangeInfo').textContent = 
+                    `숙제 범위: ${data.minProblem}번 ~ ${data.maxProblem}번 (총 ${data.totalCount}문제)`;
+                
+                document.getElementById('startNum').value = data.minProblem;
+                document.getElementById('endNum').value = data.maxProblem;
+                
+                rangeStart = data.minProblem;
+                rangeEnd = data.maxProblem;
+
+                createProblemUI();
+                updateSelectionInfo();
+
+            } catch (error) {
+                console.error('문제집 선택 실패:', error);
+                alert('오류가 발생했습니다.');
+                goBack();
+            }
         }
 
-        // 모달 닫기
-        function closeModal() {
-            document.getElementById('submitModal').classList.remove('active');
-            currentHomework = null;
+        // 뒤로가기
+        function goBack() {
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('step1').style.display = 'block';
+            currentBook = null;
             wrongSet.clear();
         }
 
@@ -590,8 +625,8 @@
                 return;
             }
 
-            if (start < currentHomework.minProblem || end > currentHomework.maxProblem) {
-                alert(`범위는 ${currentHomework.minProblem}번 ~ ${currentHomework.maxProblem}번 내에서 설정해주세요.`);
+            if (start < currentBook.minProblem || end > currentBook.maxProblem) {
+                alert(`범위는 ${currentBook.minProblem}번 ~ ${currentBook.maxProblem}번 내에서 설정해주세요.`);
                 return;
             }
 
@@ -675,13 +710,11 @@
         function switchMode(mode) {
             currentMode = mode;
 
-            // 버튼 상태 변경
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
 
-            // UI 전환
             if (mode === 'grid') {
                 document.getElementById('problemGrid').style.display = 'grid';
                 document.getElementById('problemList').style.display = 'none';
@@ -743,7 +776,7 @@
 
                 const data = await callAPI('submitHomework', {
                     studentId: studentId,
-                    bookName: currentHomework.bookName,
+                    bookName: currentBook.bookName,
                     startNum: rangeStart,
                     endNum: rangeEnd,
                     wrongAnswers: wrongList
@@ -751,8 +784,8 @@
 
                 if (data.success) {
                     alert('✅ 숙제가 제출되었습니다!');
-                    closeModal();
-                    loadHomeworkList(); // 목록 새로고침
+                    goBack();
+                    loadBookList(); // 목록 새로고침
                 } else {
                     alert('❌ 제출 실패: ' + (data.message || '알 수 없는 오류'));
                 }

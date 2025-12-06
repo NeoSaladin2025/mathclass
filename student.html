@@ -343,7 +343,7 @@
     </div>
     
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwlap6vDi2yKWRD4oYg3-H5E5HIbo7h0AVkrCP7KPBca0Jqn9KlGrk9VrMIysPokEPw/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzj8Axn5cgdQtdWzgi2R1kWHieVNnrimLyR8T-w9w9glna9kh99gberr3ozJBLUtjCo/exec';
         
         let studentId = null;
         let studentName = null;
@@ -370,7 +370,7 @@
         });
         
         // 페이지 로드 함수
-        async function loadPage(pageName) {
+        async function loadPage(pageName, menuElement = null) {
             const content = document.getElementById('mainContent');
             const loading = content.querySelector('.loading');
             
@@ -396,7 +396,19 @@
                 document.querySelectorAll('.menu-item').forEach(item => {
                     item.classList.remove('active');
                 });
-                event.currentTarget.classList.add('active');
+                
+                // 클릭된 메뉴에 active 추가
+                if (menuElement) {
+                    menuElement.classList.add('active');
+                } else {
+                    // 자동 로드 시 pageName에 해당하는 메뉴 찾기
+                    const menuItems = document.querySelectorAll('.menu-item');
+                    menuItems.forEach(item => {
+                        if (item.getAttribute('onclick').includes(pageName)) {
+                            item.classList.add('active');
+                        }
+                    });
+                }
                 
                 // 모바일에서 사이드바 닫기
                 if (window.innerWidth <= 767) {

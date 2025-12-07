@@ -392,6 +392,18 @@
                 const html = await response.text();
                 content.innerHTML = html;
                 
+                // innerHTML로 넣은 script는 실행 안 되므로 수동 실행
+                const scripts = content.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    if (oldScript.src) {
+                        newScript.src = oldScript.src;
+                    } else {
+                        newScript.textContent = oldScript.textContent;
+                    }
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+                
                 // 메뉴 active 상태 변경
                 document.querySelectorAll('.menu-item').forEach(item => {
                     item.classList.remove('active');

@@ -382,8 +382,8 @@
             }
             
             try {
-                // 페이지 로드
-                const response = await fetch(`student/${pageName}.html`);
+                // 페이지 로드 - 파일명 변경
+                const response = await fetch(`student-${pageName}.html`);
                 
                 if (!response.ok) {
                     throw new Error('페이지를 찾을 수 없습니다.');

@@ -1020,32 +1020,55 @@
                     bookName: hwSelectedBook
                 });
                 
+                console.log('📊 학생 현황 응답:', data);
+                
                 hideProgress();
                 
                 if (data.success) {
-                    // 현황 정보 저장
-                    window.studentStatus = data.status;
-                    
-                    // 입력 필드에 max 값 설정
-                    document.getElementById('hwGeneral').max = data.status.review.general;
-                    document.getElementById('hwEssay').max = data.status.review.essay;
-                    document.getElementById('hwGrade1').max = data.status.review.grade1;
-                    
                     // 숙제 설정 영역 표시
                     document.getElementById('hwProblemSettings').style.display = 'block';
                     
-                    // 현황 정보 표시 (숙제 설정 위에 추가)
-                    updateStatusDisplay(data.status);
+                    // 현황 정보 표시
+                    const statusHtml = `
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 10px 0; color: #495057;">📊 학생 현황</h4>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #667eea;">${data.homework || 0}</div>
+                                    <div style="font-size: 12px; color: #6c757d;">숙제</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #764ba2;">${data.diagnostic || 0}</div>
+                                    <div style="font-size: 12px; color: #6c757d;">진단평가</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #f093fb;">${data.wrong || 0}</div>
+                                    <div style="font-size: 12px; color: #6c757d;">오답</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // hwProblemSettings 앞에 현황 표시
+                    const settingsDiv = document.getElementById('hwProblemSettings');
+                    const existingStatus = settingsDiv.previousElementSibling;
+                    if (existingStatus && existingStatus.style.background === 'rgb(248, 249, 250)') {
+                        existingStatus.remove();
+                    }
+                    settingsDiv.insertAdjacentHTML('beforebegin', statusHtml);
                 } else {
                     alert('학생 현황 조회 실패: ' + data.message);
                 }
             } catch (error) {
+                console.error('❌ 현황 조회 에러:', error);
                 hideProgress();
                 alert('학생 현황 조회 실패: ' + error.message);
             }
         }
         
         // 🔥 현황 정보 표시 함수 (새로 추가!)
+        // 🚫 DEPRECATED - 더 이상 사용 안 함
+        /*
         function updateStatusDisplay(status) {
             // 기존 현황 박스 제거
             const existingStatus = document.getElementById('hwStatusDisplay');
@@ -1084,6 +1107,7 @@
             const problemSettings = document.getElementById('hwProblemSettings');
             problemSettings.insertAdjacentHTML('beforebegin', statusHTML);
         }
+        */
         
         // 숙제 제출
         document.getElementById('homeworkForm').addEventListener('submit', async (e) => {

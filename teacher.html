@@ -963,19 +963,31 @@
             
             hwSelectedStudent = selectedRadio.value;
             
+            console.log('🔍 loadHwBooks 시작');
+            console.log('선택된 학생:', hwSelectedStudent);
+            
             showProgress('문제집 목록 불러오는 중...');
             
             try {
+                console.log('📞 API 호출 시작...');
                 const data = await callAPI('getStudentBooks', { studentId: hwSelectedStudent });
                 
+                console.log('✅ API 응답:', data);
+                console.log('books:', data.books);
+                console.log('books 길이:', data.books ? data.books.length : 0);
+                
                 const listDiv = document.getElementById('hwBookList');
+                console.log('📦 hwBookList 요소:', listDiv);
+                
                 if (data.books && data.books.length > 0) {
+                    console.log('✅ 문제집 표시 시작');
                     listDiv.innerHTML = data.books.map(book => `
                         <label class="list-item">
                             <input type="radio" name="hwBook" value="${book}">
                             <span>${book}</span>
                         </label>
                     `).join('');
+                    console.log('✅ HTML 업데이트 완료');
                     
                     // 라디오 버튼 이벤트
                     document.querySelectorAll('input[name="hwBook"]').forEach(radio => {
@@ -986,11 +998,13 @@
                         });
                     });
                 } else {
+                    console.log('❌ 문제집 없음');
                     listDiv.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">등록된 문제집이 없습니다</p>';
                 }
                 
                 hideProgress();
             } catch (error) {
+                console.error('❌ 에러 발생:', error);
                 hideProgress();
                 alert('문제집 불러오기 실패: ' + error.message);
             }

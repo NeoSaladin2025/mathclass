@@ -1028,34 +1028,47 @@
                     // 숙제 설정 영역 표시
                     document.getElementById('hwProblemSettings').style.display = 'block';
                     
-                    // 현황 정보 표시
-                    const statusHtml = `
-                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                            <h4 style="margin: 0 0 10px 0; color: #495057;">📊 학생 현황</h4>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 24px; font-weight: bold; color: #667eea;">${data.homework || 0}</div>
-                                    <div style="font-size: 12px; color: #6c757d;">숙제</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 24px; font-weight: bold; color: #764ba2;">${data.diagnostic || 0}</div>
-                                    <div style="font-size: 12px; color: #6c757d;">진단평가</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="font-size: 24px; font-weight: bold; color: #f093fb;">${data.wrong || 0}</div>
-                                    <div style="font-size: 12px; color: #6c757d;">오답</div>
-                                </div>
+                    // 안내 메시지 표시
+                    const infoHtml = `
+                        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 10px 0; color: #1976d2;">ℹ️ 숙제 등록 안내</h4>
+                            <div style="font-size: 14px; color: #495057; line-height: 1.8;">
+                                <p style="margin: 5px 0;">1️⃣ <strong>범위 설정</strong> 입력 후 엔터를 누르면 문제 유형이 자동 집계됩니다</p>
+                                <p style="margin: 5px 0;">2️⃣ 집계된 문제 수를 확인하고 원하는 만큼 수정하세요</p>
+                                <p style="margin: 5px 0;">3️⃣ <strong>숙제 등록</strong> 버튼을 눌러 완료하세요</p>
                             </div>
                         </div>
                     `;
                     
-                    // hwProblemSettings 앞에 현황 표시
+                    // hwProblemSettings 앞에 안내 표시
                     const settingsDiv = document.getElementById('hwProblemSettings');
-                    const existingStatus = settingsDiv.previousElementSibling;
-                    if (existingStatus && existingStatus.style.background === 'rgb(248, 249, 250)') {
-                        existingStatus.remove();
+                    const existingInfo = settingsDiv.previousElementSibling;
+                    if (existingInfo && existingInfo.style.background === 'rgb(227, 242, 253)') {
+                        existingInfo.remove();
                     }
-                    settingsDiv.insertAdjacentHTML('beforebegin', statusHtml);
+                    settingsDiv.insertAdjacentHTML('beforebegin', infoHtml);
+                    
+                    // 범위 입력 필드에 이벤트 추가
+                    const rangeStart = document.getElementById('hwRangeStart');
+                    const rangeEnd = document.getElementById('hwRangeEnd');
+                    
+                    const loadRange = async () => {
+                        const start = parseInt(rangeStart.value);
+                        const end = parseInt(rangeEnd.value);
+                        
+                        if (start && end && start <= end) {
+                            await analyzeHomeworkRange(start, end);
+                        }
+                    };
+                    
+                    rangeStart.addEventListener('change', loadRange);
+                    rangeEnd.addEventListener('change', loadRange);
+                    rangeStart.addEventListener('keyup', (e) => {
+                        if (e.key === 'Enter') loadRange();
+                    });
+                    rangeEnd.addEventListener('keyup', (e) => {
+                        if (e.key === 'Enter') loadRange();
+                    });
                 } else {
                     alert('학생 현황 조회 실패: ' + data.message);
                 }
@@ -1063,6 +1076,41 @@
                 console.error('❌ 현황 조회 에러:', error);
                 hideProgress();
                 alert('학생 현황 조회 실패: ' + error.message);
+            }
+        }
+        
+        // 🔥 범위 분석 함수
+        async function analyzeHomeworkRange(start, end) {
+            showProgress('문제 유형 분석 중...');
+            
+            try {
+                const data = await callAPI('getHomeworkRange', {
+                    bookName: hwSelectedBook,
+                    startNum: start,
+                    endNum: end
+                });
+                
+                console.log('📊 범위 분석 결과:', data);
+                
+                hideProgress();
+                
+                if (data.success) {
+                    // 자동으로 입력 필드 업데이트
+                    document.getElementById('hwGeneral').value = data.general || 0;
+                    document.getElementById('hwEssay').value = data.essay || 0;
+                    document.getElementById('hwGrade1').value = data.grade1 || 0;
+                    
+                    // 결과 메시지 표시
+                    showMessage('hwMessage', 
+                        `✅ 범위 분석 완료: 일반 ${data.general}개, 서술형 ${data.essay}개, 1등급 ${data.grade1}개`, 
+                        'success');
+                } else {
+                    showMessage('hwMessage', '범위 분석 실패: ' + data.message, 'error');
+                }
+            } catch (error) {
+                console.error('❌ 범위 분석 에러:', error);
+                hideProgress();
+                showMessage('hwMessage', '범위 분석 실패: ' + error.message, 'error');
             }
         }
         

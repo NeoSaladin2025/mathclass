@@ -855,7 +855,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbw4A3Uuzc_KloFKzo95Ua9fI5KU-qvJObvP5CAgGtRKylVGygus1y7kbVMw_l3ePqW-/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzNH5Hqh2ZCi8koie4G8GOI5gZ3PvH5bro2e_HcI4zKUSMjeZMf9nNize8mboybcWuX/exec';
         
         let hwSelectedStudent = null;
         let hwSelectedBook = null;
@@ -966,7 +966,7 @@
             showProgress('문제집 목록 불러오는 중...');
             
             try {
-                const data = await callAPI('getStudentBooks', { student_id: hwSelectedStudent });
+                const data = await callAPI('getStudentBooks', { studentId: hwSelectedStudent });
                 
                 const listDiv = document.getElementById('hwBookList');
                 if (data.books && data.books.length > 0) {
@@ -1002,8 +1002,8 @@
             
             try {
                 const data = await callAPI('getStudentStatus', {
-                    student_id: hwSelectedStudent,
-                    book_name: hwSelectedBook
+                    studentId: hwSelectedStudent,
+                    bookName: hwSelectedBook
                 });
                 
                 hideProgress();
@@ -1102,8 +1102,8 @@
             
             try {
                 const data = await callAPI('registerHomework', {
-                    student_id: hwSelectedStudent,
-                    book_name: hwSelectedBook,
+                    studentId: hwSelectedStudent,
+                    bookName: hwSelectedBook,
                     range_start: rangeStart,
                     range_end: rangeEnd,
                     general_count: general,
@@ -1176,7 +1176,7 @@
             showProgress('문제집 목록 불러오는 중...');
             
             try {
-                const data = await callAPI('getStudentBooks', { student_id: diagSelectedStudent });
+                const data = await callAPI('getStudentBooks', { studentId: diagSelectedStudent });
                 
                 const listDiv = document.getElementById('diagBookList');
                 if (data.books && data.books.length > 0) {
@@ -1260,8 +1260,8 @@
             
             try {
                 const data = await callAPI('checkRangeContent', {
-                    student_id: diagSelectedStudent,
-                    book_name: diagSelectedBook,
+                    studentId: diagSelectedStudent,
+                    bookName: diagSelectedBook,
                     ranges: JSON.stringify(ranges)
                 });
                 
@@ -1331,8 +1331,8 @@
             
             try {
                 const data = await callAPI('createDiagnosticTest', {
-                    student_id: diagSelectedStudent,
-                    book_name: diagSelectedBook,
+                    studentId: diagSelectedStudent,
+                    bookName: diagSelectedBook,
                     ranges: JSON.stringify(ranges),
                     group_count: groupCount,
                     essay_count: essayCount,
